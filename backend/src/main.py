@@ -12,7 +12,15 @@ from src.dto import OutputDTO
 )
 class TextDetector:
     def __init__(self) -> None:
-        self.model = lambda x: [OutputDTO(coordinates=((0, 0), (0, 0)), content="xui", lang='eng', signature=False)]
+        self.model = self.get_model(2)
+
+    def get_model(self, num_classes):
+        model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
+        return model
+
 
     @bentoml.api
     def detect(self, image: Image) -> List[OutputDTO]:

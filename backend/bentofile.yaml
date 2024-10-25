@@ -1,0 +1,10 @@
+service: 'src.main:TextDetector'
+labels:
+  owner: baddelo
+  project: t1-hack
+include:
+  - '*.py'
+python:
+  packages:
+    - torch
+    - pillow
