@@ -10,17 +10,15 @@
 	};
 </script>
 
-<Card class="p-5">
-	<form
-		class="flex flex-col gap-3"
-		on:submit={handleSubmit}
-	>
-		<h1>Ваш документ:</h1>
-		<Uploader bind:value />
-		{#if value.length > 0}
-			<Button color="dark" pill type="submit">
-				Отправить
-			</Button>
-		{/if}
-	</form>
-</Card>
+<form
+	class="flex flex-col gap-3"
+	on:submit={handleSubmit}
+>
+	<h1>Загрузите документ:</h1>
+	<Uploader bind:value />
+	{#if value.length > 0}
+		<Button color="dark" pill type="submit">
+			Отправить
+		</Button>
+	{/if}
+</form>
