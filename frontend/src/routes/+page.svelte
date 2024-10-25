@@ -1,9 +1,5 @@
 <script>
-  import { Card } from 'flowbite-svelte';
+	import Form from '../lib/components/Form/index.svelte';
 </script>
 
-<Card>
-	<h1 class="mb-2 text-2xl tracking-tight text-gray-900 dark:text-white text-center">
-		Добро пожаловать в Ваши документы
-	</h1>
-</Card>
+<Form />
