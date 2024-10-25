@@ -5,7 +5,6 @@
 </script>
 
 <Header />
-
-<div class="w-11/12 d-flex mx-auto mt-2">
+<div class="w-10/12 flex mx-auto justify-center mt-3 pb-6">
 	<slot />
 </div>

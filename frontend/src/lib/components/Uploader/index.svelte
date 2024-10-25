@@ -1,9 +1,15 @@
 <script>
-  import { Dropzone } from 'flowbite-svelte';
+  import { Dropzone, Button } from 'flowbite-svelte';
+	import { DownloadSolid, CloseOutline } from 'flowbite-svelte-icons';
 
-	import { DownloadSolid } from 'flowbite-svelte-icons';
+  export let value = [];
 
-  let value = [];
+  const removeFile = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    value = [];
+  };
 	
   const dropHandle = (event) => {
     value = [];
@@ -48,16 +54,19 @@
 
 <Dropzone
   id="dropzone"
+  class="relative p-3"
   on:drop={dropHandle}
   on:dragover={(event) => {
     event.preventDefault();
   }}
   on:change={handleChange}
+  disabled={value.length > 0}
+  accept="image/png, image/jpeg, image/jpg"
 >
 	<DownloadSolid class="mb-3 w-12 h-12 text-gray-400" />
   {#if value.length === 0}
     <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
-			<span class="font-semibold text-blue-900 dark:text-blue-800">Нажмите, чтобы загрузить</span>
+			<span class="font-semibold text-dark">Нажмите, чтобы загрузить</span>
 			или перетащите
 		</p>
     <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -65,5 +74,17 @@
 		</p>
   {:else}
     <p>{showFiles(value)}</p>
+  {/if}
+
+  {#if value.length > 0}
+    <Button
+      class="absolute top-2 right-2 p-0"
+      on:click={removeFile}
+    >
+      <CloseOutline 
+        class="w-5 h-5"
+        color="gray"
+      />
+    </Button>
   {/if}
 </Dropzone>

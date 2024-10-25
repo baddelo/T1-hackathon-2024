@@ -1,11 +1,26 @@
 <script>
-	import { Button } from 'flowbite-svelte';
+	import { Button, Card } from 'flowbite-svelte';
 
 	import Uploader from '../Uploader/index.svelte';
+	
+	let value = [];
+
+	const handleSubmit = (event) => {
+		event.preventDefault();
+	};
 </script>
 
-<form>
-	<Uploader />
-	
-	<!-- <Button outline type="submit">Submit</Button> -->
-</form>
+<Card class="p-5">
+	<form
+		class="flex flex-col gap-3"
+		on:submit={handleSubmit}
+	>
+		<h1>Ваш документ:</h1>
+		<Uploader bind:value />
+		{#if value.length > 0}
+			<Button color="dark" pill type="submit">
+				Отправить
+			</Button>
+		{/if}
+	</form>
+</Card>
