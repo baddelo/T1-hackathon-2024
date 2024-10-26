@@ -11,7 +11,7 @@ class LanguageEnum(str, Enum):
 
 
 class OutputDTO(BaseModel):
-    coordinates: Tuple[Tuple[int, int], Tuple[int, int]]
+    coordinates: Tuple[Tuple[float, float], Tuple[float, float]]
     content: str = ''
     lang: LanguageEnum = LanguageEnum.UNKNOWN
     signature: bool = False

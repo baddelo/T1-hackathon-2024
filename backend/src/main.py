@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict, Any
 
+import numpy as np
 from PIL.Image import Image
 import bentoml
 
@@ -12,21 +13,38 @@ from src.dto import OutputDTO
 )
 class TextDetector:
     def __init__(self) -> None:
-        if not bentoml.models.list():
-            self.get_model(2)
-        self.model = bentoml.pytorch.load_model("test_detection")
+        from ultralytics import YOLO
+        self.model = YOLO('trained_models/yolov8_weights.pt')
         # lambda x: [OutputDTO(coordinates=((0, 0), (0, 0)), content="xui", lang='eng', signature=False)]
 
-    def get_model(self, num_classes):
-        import torchvision
-        from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-        model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-        in_features = model.roi_heads.box_predictor.cls_score.in_features
-        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-        bentoml.pytorch.save_model("test_detection", model)
-        return model
+    def convert_output_to_dto(self, output) -> List[OutputDTO]:
+        result = []
+        for entry in output:
+            boxes = entry['boxes']
+            labels = entry['labels']
+
+            for i in range(len(boxes)):
+                box = boxes[i]
+                label = labels[i].item()  # Convert tensor item to a scalar
+
+                # Format coordinates as pairs of [x, y]
+                coordinates = [[box[0].item(), box[1].item()], [box[2].item(), box[3].item()]]
+
+                # Append formatted dictionary to results
+                result.append(
+                    OutputDTO.model_validate(
+                        {
+                            "coordinates": coordinates,
+                            "content": "",
+                            "language": "",
+                            "signature": True if label == 1 else False
+                        }
+                    )
+                )
+        return result
 
     @bentoml.api
-    def detect(self, image: Image) -> List[OutputDTO]:
+    def detect(self, image: Image) -> Any:
         result = self.model(image)
         return result
+        # return self.convert_output_to_dto(result)

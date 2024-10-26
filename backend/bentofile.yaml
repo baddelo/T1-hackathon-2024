@@ -6,5 +6,5 @@ include:
   - '*.py'
 python:
   packages:
-    - torch
+    - ultralytics
     - pillow
