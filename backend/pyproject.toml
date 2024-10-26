@@ -12,6 +12,8 @@ pillow = "^11.0.0"
 pydantic = "^2.9.2"
 numpy = "^2.1.2"
 ultralytics = "^8.3.23"
+transformers = "^4.46.0"
+datasets = "^3.0.2"
 
 
 [build-system]
