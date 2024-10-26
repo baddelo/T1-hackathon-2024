@@ -18,16 +18,17 @@ class TextDetector:
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
         output_dtos = []
-        for pred in predictions:
-            # Извлечение координат (x_min, y_min, x_max, y_max)
-            x_min, y_min, x_max, y_max = pred.xyxy[0].tolist()  # Извлекаем координаты из предсказания
+
+        pred = predictions[0]
+        # Извлечение координат (x_min, y_min, x_max, y_max)
+        for box, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
+            x_min, y_min, x_max, y_max = box.tolist()
             coordinates = ((x_min, y_min), (x_max, y_max))
             # Извлечение других данных
-            signature = bool(pred.signature)  # Предполагаем, что есть поле signature в предсказаниях
+            signature = True if pred.names[signature.item()] == 'signature' else False
             # Создание экземпляра OutputDTO
             output_dto = OutputDTO(coordinates=coordinates, signature=signature)
             output_dtos.append(output_dto)
-
         return output_dtos
 
 
