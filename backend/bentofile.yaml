@@ -1,0 +1,17 @@
+service: 'src.main:TextDetector'
+labels:
+  owner: baddelo
+  project: t1-hack
+include:
+  - '*.py'
+  - '*.pt'
+python:
+  packages:
+    - ultralytics
+    - pillow
+    - opencv-python
+docker:
+  system_packages:
+    - ffmpeg
+    - libsm6
+    - libxext6
