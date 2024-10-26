@@ -58,14 +58,15 @@ class TextDetector:
     def detect(self, image: Image) -> List[OutputDTO]:
         detection_result = self.model_detection(image)
         dto_list = self.convert_output_to_dto(detection_result)
+        text_dto_list = [dto for dto in dto_list if not dto.signature]
         cropped_images = []
-        for dto in dto_list:
+        for dto in text_dto_list:
             cropped_image = image.crop(
                 (dto.coordinates[0][0], dto.coordinates[0][1], dto.coordinates[1][0], dto.coordinates[1][1])
             )
             cropped_images.append(cropped_image)
         with torch.no_grad():
             result = prediction(self.model_recognition, cropped_images, ALPHABET)
-        for dto, content in zip(dto_list, result):
+        for dto, content in zip(text_dto_list, result):
             dto.content = content
         return dto_list
