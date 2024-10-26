@@ -7,5 +7,5 @@
 
 <Card class="p-5 min-h-80">
 	<Form />
-	<!-- <Result /> -->
+	<!-- <Result text_result="Текст" /> -->
 </Card>
