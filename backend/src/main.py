@@ -1,20 +1,21 @@
-from typing import List, Dict, Any
+from typing import List
 
-import numpy as np
-import torch
+import numpy
 from PIL.Image import Image
 import bentoml
 
 from src.dto import OutputDTO
-from src.model.ocr_transformer import (
-    TransformerModel,
-    ALPHABET,
-    HIDDEN,
-    ENC_LAYERS,
-    DEC_LAYERS,
-    N_HEADS,
-    DROPOUT,
-    DEVICE
+with bentoml.importing():
+    import torch
+    from src.model.ocr_transformer import (
+        TransformerModel,
+        ALPHABET,
+        HIDDEN,
+        ENC_LAYERS,
+        DEC_LAYERS,
+        N_HEADS,
+        DROPOUT,
+        DEVICE, prediction
 )
 
 
@@ -34,7 +35,9 @@ class TextDetector:
             nhead=N_HEADS,
             dropout=DROPOUT
         ).to(DEVICE)
-        # self.model_recognition.load_state_dict(torch.load(''))
+        self.model_recognition.load_state_dict(
+            torch.load('trained_models/checkpoint_21.pt', map_location=DEVICE)
+        )
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
         output_dtos = []
@@ -53,5 +56,16 @@ class TextDetector:
 
     @bentoml.api
     def detect(self, image: Image) -> List[OutputDTO]:
-        result = self.model_detection(image)
-        return self.convert_output_to_dto(result)
+        detection_result = self.model_detection(image)
+        dto_list = self.convert_output_to_dto(detection_result)
+        cropped_images = []
+        for dto in dto_list:
+            cropped_image = image.crop(
+                (dto.coordinates[0][0], dto.coordinates[0][1], dto.coordinates[1][0], dto.coordinates[1][1])
+            )
+            cropped_images.append(cropped_image)
+        with torch.no_grad():
+            result = prediction(self.model_recognition, cropped_images, ALPHABET)
+        for dto, content in zip(dto_list, result):
+            dto.content = content
+        return dto_list
