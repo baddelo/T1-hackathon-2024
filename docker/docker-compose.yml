@@ -1,14 +1,22 @@
 version: '3.8'
 
 services:
+  backend:
+    image: 'text_detector:fdr44cet5ctbpzx6'
+    ports:
+      - '8000:3000'
+
   frontend:
     build:
       context: ../frontend
       dockerfile: ../frontend/Dockerfile.frontend
     expose:
       - '3000'
+    depends_on:
+      - backend
     networks:
       - internal
+      - default
 
   nginx:
     image: nginx:alpine
@@ -20,6 +28,7 @@ services:
       - frontend
     networks:
       - internal
+      - default
 
 networks:
   internal:
