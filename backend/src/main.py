@@ -14,8 +14,7 @@ from src.dto import OutputDTO
 class TextDetector:
     def __init__(self) -> None:
         from ultralytics import YOLO
-        self.model = YOLO('trained_models/yolov8_weights_v2.pt')
-        # lambda x: [OutputDTO(coordinates=((0, 0), (0, 0)), content="xui", lang='eng', signature=False)]
+        self.model = YOLO('trained_models/yolov8_weights_v2.pt'
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
         output_dtos = []
