@@ -8,7 +8,7 @@ from src.dto import OutputDTO
 
 
 @bentoml.service(
-    resources={"cpu": "2"},
+    resources={"gpu": 1},
     traffic={"timeout": 10},
 )
 class TextDetector:
@@ -17,34 +17,22 @@ class TextDetector:
         self.model = YOLO('trained_models/yolov8_weights.pt')
         # lambda x: [OutputDTO(coordinates=((0, 0), (0, 0)), content="xui", lang='eng', signature=False)]
 
-    def convert_output_to_dto(self, output) -> List[OutputDTO]:
-        result = []
-        for entry in output:
-            boxes = entry['boxes']
-            labels = entry['labels']
+    def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
+        output_dtos = []
+        for pred in predictions:
+            # Извлечение координат (x_min, y_min, x_max, y_max)
+            x_min, y_min, x_max, y_max = pred.xyxy[0].tolist()  # Извлекаем координаты из предсказания
+            coordinates = ((x_min, y_min), (x_max, y_max))
+            # Извлечение других данных
+            signature = bool(pred.signature)  # Предполагаем, что есть поле signature в предсказаниях
+            # Создание экземпляра OutputDTO
+            output_dto = OutputDTO(coordinates=coordinates, signature=signature)
+            output_dtos.append(output_dto)
 
-            for i in range(len(boxes)):
-                box = boxes[i]
-                label = labels[i].item()  # Convert tensor item to a scalar
+        return output_dtos
 
-                # Format coordinates as pairs of [x, y]
-                coordinates = [[box[0].item(), box[1].item()], [box[2].item(), box[3].item()]]
-
-                # Append formatted dictionary to results
-                result.append(
-                    OutputDTO.model_validate(
-                        {
-                            "coordinates": coordinates,
-                            "content": "",
-                            "language": "",
-                            "signature": True if label == 1 else False
-                        }
-                    )
-                )
-        return result
 
     @bentoml.api
-    def detect(self, image: Image) -> Any:
+    def detect(self, image: Image) -> List[OutputDTO]:
         result = self.model(image)
-        return result
-        # return self.convert_output_to_dto(result)
+        return self.convert_output_to_dto(result)
