@@ -23,7 +23,7 @@
 
 		setStoreImage(imageURL);
 
-	const response = await fetch(`${backendUrl}/detects`, {
+	const response = await fetch(`${backendUrl}/detect`, {
 			method: 'POST',
 			headers: {
 				"accept": "application/json"
