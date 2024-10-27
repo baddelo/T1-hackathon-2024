@@ -7,7 +7,6 @@ import numpy
 from PIL.Image import Image
 import bentoml
 from torch import tensor
-from ultralytics.engine.results import Boxes
 
 from src.dto import OutputDTO
 with bentoml.importing():
