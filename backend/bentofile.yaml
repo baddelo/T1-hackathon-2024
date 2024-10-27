@@ -5,6 +5,7 @@ labels:
 include:
   - '*.py'
   - '*.pt'
+  - '*.txt'
 python:
   packages:
     - ultralytics
