@@ -22,6 +22,17 @@ with bentoml.importing():
 @bentoml.service(
     resources={"gpu": 1},
     traffic={"timeout": 10},
+    http={
+        "cors": {
+            "enabled": True,
+            "access_control_allow_origins": ['*'],
+            "access_control_allow_methods": ["GET", "OPTIONS", "POST", "HEAD", "PUT"],
+            "access_control_allow_credentials": True,
+            "access_control_allow_headers": ["*"],
+            "access_control_max_age": 1200,
+            "access_control_expose_headers": ["Content-Length"]
+        }
+    }
 )
 class TextDetector:
     def __init__(self) -> None:
