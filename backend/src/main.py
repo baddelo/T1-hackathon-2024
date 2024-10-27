@@ -55,7 +55,7 @@ class TextDetector:
             dropout=DROPOUT
         ).to(DEVICE)
         self.model_recognition.load_state_dict(
-            torch.load('trained_models/checkpoint_155.pt', map_location=DEVICE)
+            torch.load('trained_models/checkpoint_156.pt', map_location=DEVICE)
         )
         self.words = self.load_words('russian.txt')
 
@@ -86,6 +86,7 @@ class TextDetector:
 
     def get_best_match(self, input_word, names_list):
         """Find the most appropriate Russian name based on input."""
+        print(f'{input_word = }')
         best_match, score = process.extractOne(input_word, names_list, scorer=fuzz.ratio)
         return best_match if score > 60 else input_word
 
@@ -124,5 +125,5 @@ class TextDetector:
         with torch.no_grad():
             result = prediction(self.model_recognition, cropped_images, ALPHABET)
         for dto, content in zip(text_dto_list, result):
-            dto.content = self.get_best_match(dto.content, self.words)
+            dto.content = content  # self.get_best_match(content, self.words)
         return dto_list
