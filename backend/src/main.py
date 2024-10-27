@@ -26,7 +26,7 @@ with bentoml.importing():
 
 @bentoml.service(
     resources={"gpu": 1},
-    traffic={"timeout": 10},
+    traffic={"timeout": 60},
     http={
         "cors": {
             "enabled": True,
@@ -42,7 +42,8 @@ with bentoml.importing():
 class TextDetector:
     def __init__(self) -> None:
         from ultralytics import YOLO
-        os.mkdir('/home/bentoml/crops')
+        if not os.path.exists('/home/bentoml/crops'):
+            os.mkdir('/home/bentoml/crops')
         self.model_detection = YOLO('trained_models/yolov8_weights_v2.pt')
         self.model_recognition = TransformerModel(
             len(ALPHABET),
@@ -53,7 +54,7 @@ class TextDetector:
             dropout=DROPOUT
         ).to(DEVICE)
         self.model_recognition.load_state_dict(
-            torch.load('trained_models/checkpoint_153.pt', map_location=DEVICE)
+            torch.load('trained_models/checkpoint_155.pt', map_location=DEVICE)
         )
 
     def convert_output_to_dto(self, predictions, valid_boxes: set[int]) -> List[OutputDTO]:
