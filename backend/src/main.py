@@ -1,3 +1,4 @@
+import uuid
 from typing import List
 
 import numpy
@@ -47,7 +48,7 @@ class TextDetector:
             dropout=DROPOUT
         ).to(DEVICE)
         self.model_recognition.load_state_dict(
-            torch.load('trained_models/checkpoint_21.pt', map_location=DEVICE)
+            torch.load('trained_models/checkpoint_131.pt', map_location=DEVICE)
         )
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
@@ -75,6 +76,7 @@ class TextDetector:
             cropped_image = image.crop(
                 (dto.coordinates[0][0], dto.coordinates[0][1], dto.coordinates[1][0], dto.coordinates[1][1])
             )
+            cropped_image.convert('RGB').save(f'/crops/{uuid.uuid4().hex}.jpg')
             cropped_images.append(cropped_image)
         with torch.no_grad():
             result = prediction(self.model_recognition, cropped_images, ALPHABET)
