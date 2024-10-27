@@ -18,14 +18,10 @@ with bentoml.importing():
         DEC_LAYERS,
         N_HEADS,
         DROPOUT,
-        DEVICE, prediction
-)
-
-logging.basicConfig(
-    format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.DEBUG
-)
+        DEVICE,
+        prediction
+    )
+    from ultralytics.utils.tal import TaskAlignedAssigner
 
 
 @bentoml.service(
@@ -64,6 +60,7 @@ class TextDetector:
         output_dtos = []
 
         pred = predictions[0]
+
         # Извлечение координат (x_min, y_min, x_max, y_max)
         for box, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
             x_min, y_min, x_max, y_max = box.tolist()
@@ -92,3 +89,13 @@ class TextDetector:
         for dto, content in zip(text_dto_list, result):
             dto.content = content
         return dto_list
+
+    @bentoml.api
+    def detect_test(self, image: Image):
+        aligned = TaskAlignedAssigner(topk=13, num_classes=2, alpha=1.0, beta=6.0, eps=1e-09)
+
+        detection_result = self.model_detection(image)
+        pred = detection_result[0]
+        for box1, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
+            for box2, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
+                print(f'{aligned.iou_calculation(box1, box2) = }')
