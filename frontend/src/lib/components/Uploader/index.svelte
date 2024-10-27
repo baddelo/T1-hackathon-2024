@@ -14,17 +14,19 @@
   const dropHandle = (event) => {
     value = [];
     event.preventDefault();
+
     if (event.dataTransfer.items) {
-      [...event.dataTransfer.items].forEach((item, i) => {
+      [...event.dataTransfer.items].forEach((item) => {
         if (item.kind === 'file') {
           const file = item.getAsFile();
-          value.push(file.name);
-          value = value;
+          value.push(file);
+          value = [...value];
         }
       });
     } else {
-      [...event.dataTransfer.files].forEach((file, i) => {
-        value = file.name;
+      [...event.dataTransfer.files].forEach((file) => {
+        value.push(file);
+        value = [...value];
       });
     }
   };
@@ -32,23 +34,14 @@
   const handleChange = (event) => {
     const files = event.target.files;
     if (files.length > 0) {
-      value.push(files[0].name);
-      value = value;
+      value.push(files[0]);
+      value = [...value];
     }
   };
 
   const showFiles = (files) => {
-    if (files.length === 1) return files[0];
-    let concat = '';
-    files.map((file) => {
-      concat += file;
-      concat += ',';
-      concat += ' ';
-    });
-
-    if (concat.length > 40) concat = concat.slice(0, 40);
-    concat += '...';
-    return concat;
+    if (files.length === 1) return files[0].name;
+    return files.map(file => file.name).join(', ').slice(0, 40) + '...';
   };
 </script>
 
