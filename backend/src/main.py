@@ -56,7 +56,7 @@ class TextDetector:
             torch.load('trained_models/checkpoint_153.pt', map_location=DEVICE)
         )
 
-    def convert_output_to_dto(self, predictions, valid_boxes: list[int]) -> List[OutputDTO]:
+    def convert_output_to_dto(self, predictions, valid_boxes: set[int]) -> List[OutputDTO]:
         output_dtos = []
         pred = predictions[0]
 
@@ -79,7 +79,7 @@ class TextDetector:
 
         detection_result = self.model_detection(image)
         pred: Results = detection_result[0]
-        valid_boxes = []
+        valid_boxes = set()
         for index1, (box1, conf1) in enumerate(zip(pred.boxes.xyxy, pred.boxes.conf)):
             for index2, (box2, conf2) in enumerate(zip(pred.boxes.xyxy, pred.boxes.conf)):
                 if index1 == index2:
@@ -89,9 +89,12 @@ class TextDetector:
                 if iou > tensor([0.5]):
                     print(f"{conf1 = } >= {conf2 = }")
                     if conf1 >= conf2:
-                        valid_boxes.append(index1)
+                        valid_boxes.add(index1)
                     else:
-                        valid_boxes.append(index2)
+                        valid_boxes.add(index2)
+                else:
+                    valid_boxes.add(index1)
+                    valid_boxes.add(index2)
 
         dto_list = self.convert_output_to_dto(detection_result, valid_boxes)
         text_dto_list = [dto for dto in dto_list if not dto.signature]
