@@ -9,7 +9,7 @@
 	let loading = false;
 
 	// const fetchUrl = 'http://192.168.43.86:8000/detect';
-	const fetchUrl = 'http://localhost:8000/detect';
+	const fetchUrl = 'http://backend:8000/detect';
 
 	const handlePostDetect = async () => {
 		loading = true;
