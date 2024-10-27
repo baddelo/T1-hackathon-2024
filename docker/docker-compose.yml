@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: 'text_detector:iwx3t5uuhgwyw5vl'
+    image: 'text_detector:lgxnywuuj6gmi5vl'
     ports:
       - '8000:3000'
 

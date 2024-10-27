@@ -53,7 +53,7 @@ class TextDetector:
             dropout=DROPOUT
         ).to(DEVICE)
         self.model_recognition.load_state_dict(
-            torch.load('trained_models/checkpoint_132.pt', map_location=DEVICE)
+            torch.load('trained_models/checkpoint_153.pt', map_location=DEVICE)
         )
 
     def convert_output_to_dto(self, predictions, valid_boxes: list[int]) -> List[OutputDTO]:
