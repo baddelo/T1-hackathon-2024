@@ -1,3 +1,5 @@
+import logging
+import os
 import uuid
 from typing import List
 
@@ -19,6 +21,12 @@ with bentoml.importing():
         DEVICE, prediction
 )
 
+logging.basicConfig(
+    format="%(levelname)s [%(asctime)s] %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.DEBUG
+)
+
 
 @bentoml.service(
     resources={"gpu": 1},
@@ -26,7 +34,7 @@ with bentoml.importing():
     http={
         "cors": {
             "enabled": True,
-            "access_control_allow_origins": ['*'],
+            "access_control_allow_origins": ['*', "http://192.168.43.188"],
             "access_control_allow_methods": ["GET", "OPTIONS", "POST", "HEAD", "PUT"],
             "access_control_allow_credentials": True,
             "access_control_allow_headers": ["*"],
@@ -38,6 +46,7 @@ with bentoml.importing():
 class TextDetector:
     def __init__(self) -> None:
         from ultralytics import YOLO
+        os.mkdir('/home/bentoml/crops')
         self.model_detection = YOLO('trained_models/yolov8_weights_v2.pt')
         self.model_recognition = TransformerModel(
             len(ALPHABET),
@@ -48,7 +57,7 @@ class TextDetector:
             dropout=DROPOUT
         ).to(DEVICE)
         self.model_recognition.load_state_dict(
-            torch.load('trained_models/checkpoint_131.pt', map_location=DEVICE)
+            torch.load('trained_models/checkpoint_132.pt', map_location=DEVICE)
         )
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
@@ -76,7 +85,7 @@ class TextDetector:
             cropped_image = image.crop(
                 (dto.coordinates[0][0], dto.coordinates[0][1], dto.coordinates[1][0], dto.coordinates[1][1])
             )
-            cropped_image.convert('RGB').save(f'/crops/{uuid.uuid4().hex}.jpg')
+            cropped_image.convert('RGB').save(f'/home/bentoml/crops/{uuid.uuid4().hex}.jpg')
             cropped_images.append(cropped_image)
         with torch.no_grad():
             result = prediction(self.model_recognition, cropped_images, ALPHABET)
