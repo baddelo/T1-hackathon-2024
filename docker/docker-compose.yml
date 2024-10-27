@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: 'text_detector:ma2tz5uum2k445vl'
+    image: 'text_detector:kvkglyuunkixo5vl'
     ports:
       - '8000:3000'
     networks:
@@ -16,7 +16,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - BACKEND_URL=http://backend:3000
+      - BACKEND_URL=http://localhost:8000
     depends_on:
       - backend
     networks:

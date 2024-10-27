@@ -9,8 +9,7 @@
 	let loading = false;
 
 	// const fetchUrl = 'http://192.168.43.86:8000/detect';
-	// const fetchUrl = 'http://backend:8000/detect';
-	const backendUrl = import.meta.env.BACKEND_URL;
+	const fetchUrl = 'http://localhost:8000';
 
 
 	const handlePostDetect = async () => {
@@ -23,7 +22,7 @@
 
 		setStoreImage(imageURL);
 
-	const response = await fetch(`${backendUrl}/detect`, {
+	const response = await fetch(`${fetchUrl}/detect`, {
 			method: 'POST',
 			headers: {
 				"accept": "application/json"
