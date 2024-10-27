@@ -22,6 +22,7 @@ with bentoml.importing():
     from torch import tensor
     from ultralytics.engine.results import Results
     from ultralytics.utils.tal import TaskAlignedAssigner
+    from fuzzywuzzy import fuzz, process
 
 
 @bentoml.service(
@@ -56,6 +57,7 @@ class TextDetector:
         self.model_recognition.load_state_dict(
             torch.load('trained_models/checkpoint_155.pt', map_location=DEVICE)
         )
+        self.words = self.load_words('russian.txt')
 
     def convert_output_to_dto(self, predictions, valid_boxes: set[int]) -> List[OutputDTO]:
         output_dtos = []
@@ -73,6 +75,19 @@ class TextDetector:
             output_dto = OutputDTO(coordinates=coordinates, signature=signature)
             output_dtos.append(output_dto)
         return output_dtos
+
+    def load_words(self, file_path):
+        """Load names from a CSV file and return a list of full names."""
+        with open(file_path, mode='r', encoding='utf-8') as file:
+            return [
+                line.replace('\n', '')
+                for line in file.readlines()
+            ]
+
+    def get_best_match(self, input_word, names_list):
+        """Find the most appropriate Russian name based on input."""
+        best_match, score = process.extractOne(input_word, names_list, scorer=fuzz.ratio)
+        return best_match if score > 60 else input_word
 
     @bentoml.api
     def detect(self, image: Image):
@@ -109,5 +124,5 @@ class TextDetector:
         with torch.no_grad():
             result = prediction(self.model_recognition, cropped_images, ALPHABET)
         for dto, content in zip(text_dto_list, result):
-            dto.content = content
+            dto.content = self.get_best_match(dto.content, self.words)
         return dto_list
