@@ -6,6 +6,8 @@ from typing import List
 import numpy
 from PIL.Image import Image
 import bentoml
+from torch import tensor
+from ultralytics.engine.results import Boxes
 
 from src.dto import OutputDTO
 with bentoml.importing():
@@ -58,7 +60,6 @@ class TextDetector:
 
     def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
         output_dtos = []
-
         pred = predictions[0]
 
         # Извлечение координат (x_min, y_min, x_max, y_max)
@@ -96,6 +97,12 @@ class TextDetector:
 
         detection_result = self.model_detection(image)
         pred = detection_result[0]
-        for box1, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
-            for box2, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
-                print(f'{aligned.iou_calculation(box1, box2) = }')
+        print(f'{type(pred)} = ')
+        for index1, (box1, conf1) in enumerate(zip(pred.boxes.xyxy, pred.boxes.conf)):
+            for index2, (box2, conf2) in enumerate(zip(pred.boxes.xyxy, pred.boxes.conf)):
+                if index1 == index2:
+                    continue
+                if aligned.iou_calculation(box1, box2) > tensor([0.5]):
+                    if conf1 > conf2:
+                        print('here')
+                        pass
