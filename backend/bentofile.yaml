@@ -13,6 +13,7 @@ python:
     - transformers
     - pandas
     - torch
+    - shapely
 docker:
   system_packages:
     - ffmpeg
