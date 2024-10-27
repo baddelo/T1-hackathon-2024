@@ -1,12 +1,9 @@
-import logging
 import os
 import uuid
 from typing import List
 
-import numpy
 from PIL.Image import Image
 import bentoml
-from torch import tensor
 
 from src.dto import OutputDTO
 with bentoml.importing():
@@ -22,6 +19,7 @@ with bentoml.importing():
         DEVICE,
         prediction
     )
+    from torch import tensor
     from ultralytics.engine.results import Results
     from ultralytics.utils.tal import TaskAlignedAssigner
 
@@ -58,22 +56,7 @@ class TextDetector:
             torch.load('trained_models/checkpoint_132.pt', map_location=DEVICE)
         )
 
-    def convert_output_to_dto(self, predictions) -> List[OutputDTO]:
-        output_dtos = []
-        pred = predictions[0]
-
-        # Извлечение координат (x_min, y_min, x_max, y_max)
-        for box, signature in zip(pred.boxes.xyxy, pred.boxes.cls):
-            x_min, y_min, x_max, y_max = box.tolist()
-            coordinates = ((x_min, y_min), (x_max, y_max))
-            # Извлечение других данных
-            signature = True if pred.names[signature.item()] == 'signature' else False
-            # Создание экземпляра OutputDTO
-            output_dto = OutputDTO(coordinates=coordinates, signature=signature)
-            output_dtos.append(output_dto)
-        return output_dtos
-
-    def convert_output_to_dto_with_iou(self, predictions, valid_boxes: list[int]) -> List[OutputDTO]:
+    def convert_output_to_dto(self, predictions, valid_boxes: list[int]) -> List[OutputDTO]:
         output_dtos = []
         pred = predictions[0]
 
@@ -91,25 +74,7 @@ class TextDetector:
         return output_dtos
 
     @bentoml.api
-    def detect(self, image: Image) -> List[OutputDTO]:
-        detection_result = self.model_detection(image)
-        dto_list = self.convert_output_to_dto(detection_result)
-        text_dto_list = [dto for dto in dto_list if not dto.signature]
-        cropped_images = []
-        for dto in text_dto_list:
-            cropped_image = image.crop(
-                (dto.coordinates[0][0], dto.coordinates[0][1], dto.coordinates[1][0], dto.coordinates[1][1])
-            )
-            cropped_image.convert('RGB').save(f'/home/bentoml/crops/{uuid.uuid4().hex}.jpg')
-            cropped_images.append(cropped_image)
-        with torch.no_grad():
-            result = prediction(self.model_recognition, cropped_images, ALPHABET)
-        for dto, content in zip(text_dto_list, result):
-            dto.content = content
-        return dto_list
-
-    @bentoml.api
-    def detect_test(self, image: Image):
+    def detect(self, image: Image):
         aligned = TaskAlignedAssigner(topk=13, num_classes=2, alpha=1.0, beta=6.0, eps=1e-09)
 
         detection_result = self.model_detection(image)
@@ -119,7 +84,10 @@ class TextDetector:
             for index2, (box2, conf2) in enumerate(zip(pred.boxes.xyxy, pred.boxes.conf)):
                 if index1 == index2:
                     continue
-                if aligned.iou_calculation(box1, box2) > tensor([0.5]):
+                iou = aligned.iou_calculation(box1, box2)
+                print(f'{iou =}')
+                if iou > tensor([0.5]):
+                    print(f"{conf1 = } >= {conf2 = }")
                     if conf1 >= conf2:
                         valid_boxes.append(index1)
                     else:
