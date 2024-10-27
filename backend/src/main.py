@@ -93,7 +93,7 @@ class TextDetector:
                     else:
                         valid_boxes.append(index2)
 
-        dto_list = self.convert_output_to_dto(detection_result)
+        dto_list = self.convert_output_to_dto(detection_result, valid_boxes)
         text_dto_list = [dto for dto in dto_list if not dto.signature]
         cropped_images = []
         for dto in text_dto_list:
